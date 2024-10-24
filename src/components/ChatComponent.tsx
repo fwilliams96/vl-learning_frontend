@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { useState, useRef, useEffect } from 'react';
@@ -6,6 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Mic, Send, Volume2 } from "lucide-react";
+import { startChat } from '@/services/chatService';
+import { Chat } from '@/models/chat';
+import { ChatMessageOrigin, ChatMessageType } from '@/models/chat-message';
 
 export default function ChatComponent() {
   const [messages, setMessages] = useState([
@@ -34,6 +38,8 @@ export default function ChatComponent() {
   const [inputText, setInputText] = useState('')
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [chat, setChat] = useState<Chat | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -41,11 +47,27 @@ export default function ChatComponent() {
 
   const handleSendMessage = () => {
     if (inputText.trim()) {
-      setMessages([...messages, { type: 'user', content: inputText }])
+      setChat((prev: Chat | null) => {
+        if (prev) {
+          return {
+            ...prev,
+            messages: [...prev.messages, { text: inputText, type: ChatMessageType.TEXT, origin: ChatMessageOrigin.USER }]
+          }
+        }
+        return prev;
+      });
       setInputText('')
       // Simulate AI response
       setTimeout(() => {
-        setMessages(prev => [...prev, { type: 'ai', content: "That's interesting! Can you tell me more about that?" }])
+        setChat((prev: Chat | null) => {
+          if (prev) {
+            return {
+              ...prev,
+              messages: [...prev.messages, { text: "That's interesting! Can you tell me more about that?", type: ChatMessageType.TEXT, origin: ChatMessageOrigin.AGENT }]
+            }
+          }
+          return prev;
+        });
       }, 1000)
     }
   }
@@ -66,7 +88,7 @@ export default function ChatComponent() {
             // Here you would typically send this blob to your AI service
             console.log("Audio recorded", audioBlob)
             // Simulate AI response
-            setMessages(prev => [...prev, { type: 'ai', content: "I've received your audio message. Let's continue our English practice!" }])
+            //setMessages(prev => [...prev, { type: 'ai', content: "I've received your audio message. Let's continue our English practice!" }])
           }
         })
     }
@@ -79,6 +101,19 @@ export default function ChatComponent() {
       setIsPlaying(true)
     }
   }
+
+  const loadChat = async () => {
+    try {
+      const response = await startChat();
+      setChat(response);
+    } catch (err) {
+      setError("Error fetching chats");
+    }
+  };
+
+  useEffect(() => {
+    loadChat();
+  }, [])
 
   useEffect(() => {
     if (audioRef.current) {
@@ -105,10 +140,10 @@ export default function ChatComponent() {
           <div className="flex-grow flex relative">
             <ScrollArea className="flex-grow h-[calc(100vh-16rem)] pr-5" ref={scrollAreaRef}>
               <div className="space-y-4">
-                {messages.map((message, index) => (
-                  <div key={index} className={`flex ${message.type === 'user' ? 'justify-start' : 'justify-end'}`}>
-                    <div className={`max-w-[70%] p-3 rounded-lg ${message.type === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
-                      {message.content}
+                {chat?.messages.map((message, index) => (
+                  <div key={index} className={`flex ${message.origin === 'USER' ? 'justify-start' : 'justify-end'}`}>
+                    <div className={`max-w-[70%] p-3 rounded-lg ${message.origin === 'USER' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
+                      {message.text}
                     </div>
                   </div>
                 ))}

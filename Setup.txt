@@ -1,0 +1,7 @@
+npm create vite@latest <my_project>
+
+npm install -D tailwindcss postcss autoprefixer
+
+npx tailwindcss init -p
+
+
