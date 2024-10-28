@@ -1,0 +1,12 @@
+.chat-handle {
+    color: #fff;
+    padding: 10px;
+    cursor: move;
+}
+
+.chat-messages {
+    height: calc(100% - 4rem); /* Ajusta este valor según la altura de tu encabezado */
+    overflow-y: auto; /* Permite el desplazamiento vertical */
+    padding: 0 1rem; /* Asegura que haya espacio en los lados */
+}
+  

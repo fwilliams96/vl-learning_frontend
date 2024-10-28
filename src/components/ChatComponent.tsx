@@ -8,10 +8,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Mic, Send, Volume2 } from "lucide-react";
 import { startChat } from '@/services/chatService';
-import { Chat } from '@/models/chat';
+import { ChatData } from '@/models/chat';
 import { ChatMessageOrigin, ChatMessageType } from '@/models/chat-message';
+import { useChat } from "../hooks/useChat";
 
-export default function ChatComponent() {
+export default function ChatComponent({ hidden }: { hidden: boolean } ) {
   const [messages, setMessages] = useState([
     { type: 'ai', content: "Hello! I'm your AI English tutor. How can I help you today?" },
     { type: 'user', content: "Hi! I'd like to practice my English conversation skills." },
@@ -39,15 +40,30 @@ export default function ChatComponent() {
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [chat, setChat] = useState<Chat | null>(null);
+  const [chatData, setChatData] = useState<ChatData | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const { chat, loading, cameraZoomed, setCameraZoomed, message } = useChat();
+
+  useEffect(() => {
+    if (message?.text) {
+      setChatData((prev: ChatData | null) => {
+        if (prev) {
+          return {
+            ...prev,
+            messages: [...prev.messages, { text: message.text, type: ChatMessageType.TEXT, origin: ChatMessageOrigin.AGENT }]
+          }
+        }
+        return prev;
+      });
+    }
+  }, [message]);
 
   const handleSendMessage = () => {
-    if (inputText.trim()) {
-      setChat((prev: Chat | null) => {
+    if (!loading && !message && inputText) {
+      setChatData((prev: ChatData | null) => {
         if (prev) {
           return {
             ...prev,
@@ -56,19 +72,8 @@ export default function ChatComponent() {
         }
         return prev;
       });
-      setInputText('')
-      // Simulate AI response
-      setTimeout(() => {
-        setChat((prev: Chat | null) => {
-          if (prev) {
-            return {
-              ...prev,
-              messages: [...prev.messages, { text: "That's interesting! Can you tell me more about that?", type: ChatMessageType.TEXT, origin: ChatMessageOrigin.AGENT }]
-            }
-          }
-          return prev;
-        });
-      }, 1000)
+      chat(inputText);
+      setInputText('');
     }
   }
 
@@ -105,7 +110,7 @@ export default function ChatComponent() {
   const loadChat = async () => {
     try {
       const response = await startChat();
-      setChat(response);
+      setChatData(response);
     } catch (err) {
       setError("Error fetching chats");
     }
@@ -130,17 +135,21 @@ export default function ChatComponent() {
     }
   }, [messages]);
 
+  if (hidden) {
+    return null;
+  }
+
   return (
-      <Card className="flex-grow relative dark:bg-gray-900">
-        <CardContent className="flex flex-col h-full p-6">
+      <Card className="flex-grow relative dark:bg-gray-800 rounded-none">
+        <CardContent className="flex flex-col h-full p-6 dark:bg-gray-800">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold dark:text-gray-200">Chat</h2>
+            <h2 className="text-2xl font-bold dark:text-gray-200">Conversación</h2>
           </div>
           
           <div className="flex-grow flex relative">
             <ScrollArea className="flex-grow h-[calc(100vh-16rem)] pr-5" ref={scrollAreaRef}>
               <div className="space-y-4">
-                {chat?.messages.map((message, index) => (
+                {chatData?.messages.map((message, index) => (
                   <div key={index} className={`flex ${message.origin === 'USER' ? 'justify-start' : 'justify-end'}`}>
                     <div className={`max-w-[70%] p-3 rounded-lg ${message.origin === 'USER' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
                       {message.text}

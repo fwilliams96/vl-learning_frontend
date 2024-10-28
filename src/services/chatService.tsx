@@ -1,6 +1,6 @@
 // /src/services/chaService.tsx
 
-import { Chat } from '@/models/chat';
+import { ChatData } from '@/models/chat';
 import { ChatMessage, ChatMessageOrigin, ChatMessageType } from '@/models/chat-message';
 import axios from 'axios';
 
@@ -8,7 +8,7 @@ import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_URL;
 const endpointUrl = `${API_URL}/chat`;
 
-export async function startChat(): Promise<Chat> {
+export async function startChat(): Promise<ChatData> {
   try {
     /*const response = await axios.post(endpointUrl);
     return response.data;*/
@@ -20,30 +20,16 @@ export async function startChat(): Promise<Chat> {
 }
 
 // create a mockup startChat function with some messages already
-export function mockStartChat(): Promise<Chat> {
+export function mockStartChat(): Promise<ChatData> {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const mockChat: Chat = {
+      const mockChat: ChatData = {
         id: '123456',
         messages: [
           {
             id: '1',
             type: ChatMessageType.TEXT,
-            text: "Hello! I'm your AI English tutor. How can I help you today?",
-            sent_date: new Date().toISOString(),
-            origin: ChatMessageOrigin.AGENT
-          },
-          {
-            id: '2',
-            type: ChatMessageType.TEXT,
-            text: "Hi! I'd like to practice my English conversation skills.",
-            sent_date: new Date().toISOString(),
-            origin: ChatMessageOrigin.USER
-          },
-          {
-            id: '3',
-            type: ChatMessageType.TEXT,
-            text: "That's great! Let's start with a simple topic. Can you tell me about your favorite hobby?",
+            text: "¡Buenas! ¿En qué puedo ayudarte hoy?",
             sent_date: new Date().toISOString(),
             origin: ChatMessageOrigin.AGENT
           }
@@ -58,7 +44,7 @@ export function mockStartChat(): Promise<Chat> {
 }
 
 
-export async function endChat(chatId: string): Promise<Chat> {
+export async function endChat(chatId: string): Promise<ChatData> {
   try {
     const response = await axios.post(`${endpointUrl}/${chatId}/finish`);
     return response.data;
@@ -68,7 +54,7 @@ export async function endChat(chatId: string): Promise<Chat> {
   }
 }
 
-export async function recoverChat(chatId: string): Promise<Chat> {
+export async function recoverChat(chatId: string): Promise<ChatData> {
   try {
     const response = await axios.get(`${endpointUrl}/${chatId}`);
     return response.data;
