@@ -6,25 +6,22 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Mic, Move, Send, Volume2 } from 'lucide-react';
 import Draggable, { DraggableEvent } from 'react-draggable';
-import './Chat.css';
+import './RolePlay.css';
 import { ResizableBox } from 'react-resizable';
-import { useChat } from '@/hooks/useChat';
-import { ChatData } from '@/models/chat';
-import { ChatMessageType, ChatMessageOrigin } from '@/models/chat-message';
-import { startChat } from '@/services/chatService';
+import { useRolePlay } from '@/hooks/useRolePlay';
+import { RolePlayMessageOrigin, RolePlayMessageType } from '@/models/role-play-message';
+import { RolePlayData, RolePlayType } from '@/models/role-play';
 import { useAvatarController } from '@/hooks/useAvatarController';
 
-const Chat: React.FC = () => {
-  const [messages, setMessages] = useState<{ text: string; sender: 'user' | 'ai' }[]>([
-      { text: "Welcome to the English Academy AI chat! How can I help you today?", sender: 'ai' }
-    ])
+const RolePlay: React.FC = () => {
+   
   const [inputText, setInputText] = useState('')
   const [isExpanded, setIsExpanded] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const [chatPosition, setChatPosition] = useState({ x: 400, y: 100 });
   const [chatSize, setChatSize] = useState({ width: 600, height: 800 });
-  const { chat, loading, cameraZoomed, setCameraZoomed, message } = useChat();
-  const [chatData, setChatData] = useState<ChatData | null>(null);
+  const {generateRolePlay, chat, getRolePlayEvaluation, rolePlay, message, evaluation, loading } = useRolePlay();
+  const [rolePlayData, setRolePlayData] = useState<RolePlayData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -32,15 +29,19 @@ const Chat: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { setMessage, setOnMessagePlayed } = useAvatarController();
 
-  const [gameState, setGameState] = useState<'initial' | 'playing'>('initial');
+  const [gameState, setGameState] = useState<'initial' | 'selecting' | 'playing'>('initial');
+
+  useEffect(() => {
+    setRolePlayData(rolePlay);
+  }, [rolePlay]);
 
   useEffect(() => {
     if (message?.text) {
-      setChatData((prev: ChatData | null) => {
+      setRolePlayData((prev: RolePlayData | null) => {
         if (prev) {
           return {
             ...prev,
-            messages: [...prev.messages, { text: message.text, type: ChatMessageType.TEXT, origin: ChatMessageOrigin.AGENT }]
+            messages: [...prev.messages, { text: message.text, type: RolePlayMessageType.TEXT, origin: RolePlayMessageOrigin.AGENT }]
           }
         }
         return prev;
@@ -58,17 +59,17 @@ const Chat: React.FC = () => {
   }, [message]);
 
   const handleSendMessage = () => {
-    if (!loading && !message && inputText) {
-      setChatData((prev: ChatData | null) => {
+    if (!loading && !message && inputText && rolePlay) {
+      setRolePlayData((prev: RolePlayData | null) => {
         if (prev) {
           return {
             ...prev,
-            messages: [...prev.messages, { text: inputText, type: ChatMessageType.TEXT, origin: ChatMessageOrigin.USER }]
+            messages: [...prev.messages, { text: inputText, type: RolePlayMessageType.TEXT, origin: RolePlayMessageOrigin.USER }]
           }
         }
         return prev;
       });
-      chat(inputText);
+      chat(inputText, rolePlay.id);
       setInputText('');
     }
   }
@@ -103,19 +104,6 @@ const Chat: React.FC = () => {
     }
   }
 
-  const loadChat = async () => {
-    try {
-      const response = await startChat();
-      setChatData(response);
-    } catch (err) {
-      setError("Error fetching chats");
-    }
-  };
-
-  useEffect(() => {
-    loadChat();
-  }, [])
-
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.onended = () => setIsPlaying(false)
@@ -129,7 +117,7 @@ const Chat: React.FC = () => {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
       }
     }
-  }, [messages]);
+  }, [rolePlay?.messages]);
 
   const handleDrag = (e: DraggableEvent, data: { x: number; y: number }) => {
     setChatPosition({ x: data.x, y: data.y });
@@ -138,8 +126,18 @@ const Chat: React.FC = () => {
   const handleResize = (e: React.SyntheticEvent, { size }: { size: { width: number; height: number } }) => {
     setChatSize({ width: size.width, height: size.height });
   };
+  
+  // Remove or modify the initial useEffect that auto-starts the game
+  // useEffect(() => {
+  //   generateRolePlay(RolePlayType.JOB_INTERVIEW);
+  // }, [])
 
   const handleStart = () => {
+    setGameState('selecting');
+  };
+
+  const handleSelectType = (type: RolePlayType) => {
+    generateRolePlay(type);
     setGameState('playing');
   };
 
@@ -154,12 +152,28 @@ const Chat: React.FC = () => {
           </div>
         );
       
+      case 'selecting':
+        return (
+          <div className="flex flex-col gap-4 p-4">
+            {Object.values(RolePlayType).map((type) => (
+              <Button 
+                key={type}
+                onClick={() => handleSelectType(type)}
+                variant="outline"
+                className="w-full text-left"
+              >
+                {type.replace(/_/g, ' ')}
+              </Button>
+            ))}
+          </div>
+        );
+      
       case 'playing':
         return (
           <>
             <ScrollArea className="h-[calc(50vh-4rem)] pr-5" ref={scrollAreaRef}>
               <div className="space-y-4 p-4">
-                {chatData?.messages.map((message, index) => (
+                {rolePlay?.messages.map((message, index) => (
                   <div key={index} className={`flex ${message.origin === 'USER' ? 'justify-start' : 'justify-end'}`}>
                   <div className={`max-w-[70%] p-3 rounded-lg ${message.origin === 'USER' ? 'bg-gray-200 text-black' : 'bg-gray-800 text-white'}`}>
                     {message.text}
@@ -209,20 +223,11 @@ const Chat: React.FC = () => {
       <div className="w-full bg-gray-100 dark:bg-gray-900">
       <Card className={`transition-all duration-300 ease-in-out`}>
       <CardHeader className="chat-handle flex flex-row items-center justify-between space-y-0 pb-2 cursor-move">
-      <CardTitle className="text-2xl font-bold text-black dark:text-white">Chat with AI Tutor</CardTitle>
+      <CardTitle className="text-2xl font-bold text-black dark:text-white">Practice your English in real scenarios</CardTitle>
             <div className="flex space-x-2">
               <Button size="icon" aria-label="Move chat window">
                 <Move className="h-4 w-4" />
               </Button>
-              {/*<Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setIsExpanded(!isExpanded)}
-                aria-label={isExpanded ? "Minimize chat window" : "Maximize chat window"}
-              >
-                {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-              </Button>
-              */}
             </div>
         </CardHeader>
         <CardContent>
@@ -236,4 +241,4 @@ const Chat: React.FC = () => {
   );
 };
 
-export default Chat;
+export default RolePlay;

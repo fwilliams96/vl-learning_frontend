@@ -1,6 +1,7 @@
-import { Headphones, Link, MessageSquare, Mic, Users } from "lucide-react";
+import { Headphones, MessageSquare, Mic, Users } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "./ui/card";
+import { Link } from 'react-router-dom';
 
 export function Home() {
 
@@ -9,25 +10,29 @@ export function Home() {
         title: "Mantén una charla en inglés con nuestro avatar",
         description: "Practica conversaciones naturales con nuestro avatar AI.",
         icon: <MessageSquare className="h-6 w-6" />,
-        image: "/placeholder.svg?height=200&width=300"
+        image: "images/chat.jpg",
+        route: "/chat"
     },
     {
-        title: "Realiza ejercicios como role-plays",
+        title: "Encarna diferentes situaciones mediante role-plays",
         description: "Mejora tus habilidades con situaciones de la vida real.",
         icon: <Users className="h-6 w-6" />,
-        image: "/placeholder.svg?height=200&width=300"
+        image: "images/role_play.jpg",
+        route: "/role-play"
     },
     {
         title: "Practica tu escucha",
         description: "Mejora tu comprensión auditiva con diversos acentos y velocidades.",
         icon: <Headphones className="h-6 w-6" />,
-        image: "/placeholder.svg?height=200&width=300"
+        image: "images/listening.jpg",
+        route: "/listening"
     },
     {
-        title: "Practica tu pronunciación",
-        description: "Perfecciona tu acento y entonación con feedback en tiempo real.",
+        title: "Practica la descripción de objetos y personas",
+        description: "Mejora la descripción de objetos y personas con imágenes generadas por IA.",
         icon: <Mic className="h-6 w-6" />,
-        image: "/placeholder.svg?height=200&width=300"
+        image: "images/description.jpg",
+        route: "/description"
     }
     ]
 
@@ -37,7 +42,7 @@ export function Home() {
             <div className="flex flex-col md:flex-row items-center bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
                 <div className="md:w-1/2">
                 <img 
-                    src="/placeholder.svg?height=400&width=600" 
+                    src="/images/academy.jpg" 
                     alt="English learning illustration" 
                     className="w-full h-full object-cover"
                 />
@@ -58,29 +63,31 @@ export function Home() {
             <h2 className="text-2xl font-bold mb-6 dark:text-white">Nuestros Servicios</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {services.map((service, index) => (
-                <Card key={index} className="flex flex-col dark:bg-gray-700">
-                    <CardHeader>
-                    <CardTitle className="flex items-center gap-2 dark:text-white">
-                        {service.icon}
-                        <span>{service.title}</span>
-                    </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex-grow flex flex-col">
-                    <CardDescription className="mb-4 dark:text-gray-300">{service.description}</CardDescription>
-                    <img 
-                        src={service.image} 
-                        alt={service.title} 
-                        className="w-full h-40 object-cover rounded-md mt-auto"
-                    />
-                    </CardContent>
-                </Card>
+                <Link to={service.route} key={index} className="flex flex-col dark:bg-gray-700">
+                    <Card>
+                        <CardHeader>
+                        <CardTitle className="flex items-center gap-2 dark:text-white">
+                            {service.icon}
+                            <span>{service.title}</span>
+                        </CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-grow flex flex-col">
+                        <CardDescription className="mb-4 dark:text-gray-300">{service.description}</CardDescription>
+                        <img 
+                            src={service.image} 
+                            alt={service.title} 
+                            className="w-full h-40 object-cover rounded-md mt-auto"
+                        />
+                        </CardContent>
+                    </Card>
+                </Link>
                 ))}
             </div>
             </section>
 
             <section className="mt-12 text-center">
             <Button asChild size="lg">
-                <Link href="/chat">Comienza a practicar ahora</Link>
+                <Link to="/chat">Comienza a practicar ahora</Link>
             </Button>
             </section>
         </main>

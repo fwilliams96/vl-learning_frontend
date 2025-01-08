@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import Draggable, { DraggableEvent } from 'react-draggable';
 import { ResizableBox } from 'react-resizable';
-import ChatWindow from './ChatWindow';
+import ChatWindow from './Chat';
 import './DraggableChat.css';
 
 const ChatPage: React.FC = () => {

@@ -9,10 +9,10 @@ import { button, useControls } from 'leva'
 
 import * as THREE from "three";
 import { JSX } from 'react/jsx-runtime'
-import { useChat } from "../hooks/useChat";
 import { Lipsync } from '@/models/message';
 import { GLTF } from 'three-stdlib'
 import { useFrame } from '@react-three/fiber';
+import { useAvatarController } from '@/hooks/useAvatarController';
 
 const facialExpressions = {
   default: {},
@@ -143,8 +143,8 @@ export function Avatar(props: JSX.IntrinsicElements['group']) {
       "/models/670c1a0b1298836a25015bab-transformed.glb"
     ) as GLTFResult;
 
-    const { message, onMessagePlayed, chat } = useChat();
-  
+    const { message, onMessagePlayed } = useAvatarController();
+
     const [lipsync, setLipsync] = useState<Lipsync>();
   
     useEffect(() => {
@@ -159,7 +159,7 @@ export function Avatar(props: JSX.IntrinsicElements['group']) {
       const audio = new Audio("data:audio/mp3;base64," + message.audio);
       audio.play();
       setAudio(audio);
-      audio.onended = onMessagePlayed;
+      audio.onended = onMessagePlayed || null;
     }, [message]);
   
     //const { animations } = useGLTF("/models/animations.glb");
@@ -328,7 +328,6 @@ export function Avatar(props: JSX.IntrinsicElements['group']) {
     });
   
     useControls("FacialExpressions", {
-      chat: button(() => chat),
       winkLeft: button(() => {
         setWinkLeft(true);
         setTimeout(() => setWinkLeft(false), 300);

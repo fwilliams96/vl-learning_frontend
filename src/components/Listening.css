@@ -1,0 +1,40 @@
+input[type="range"] {
+    -webkit-appearance: none;
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    outline: none;
+}
+
+input[type="range"].progress-bar {
+    background: linear-gradient(to right, #71717a var(--progress), #d4d4d8 var(--progress));
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #71717a;  /* Same as the filled part */
+    border-radius: 50%;
+    cursor: pointer;
+    margin-top: -4px;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    background: #71717a;  /* Same as the filled part */
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 2px;
+}
+
+input[type="range"]::-moz-range-track {
+    height: 4px;
+    border-radius: 2px;
+}

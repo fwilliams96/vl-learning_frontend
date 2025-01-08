@@ -1,3 +1,7 @@
+import { Canvas } from "@react-three/fiber";
+import { Leva } from "leva"
+import { Loader } from "@react-three/drei";
+import "./Experience.css";
 import {
   CameraControls,
   ContactShadows,
@@ -37,9 +41,8 @@ const Dots = ({ position_x, position_y }: { position_x: number, position_y: numb
     </group>
   );
 };
-
-export const Experience = () => {
-
+export function Experience({ children }: { children: React.ReactNode }) {
+  
   const cameraControls = useRef<CameraControls>(null);
   const { cameraZoomed } = useChat();
   const [controlsEnabled, setControlsEnabled] = useState(true);
@@ -51,42 +54,38 @@ export const Experience = () => {
   useEffect(() => {
     if (cameraZoomed) {
       //cameraControls?.current?.setLookAt(0, 1.5, 1.5, 0, 1.5, 0, true);
-      cameraControls?.current?.setLookAt(0, 1.5, 3, 0, 1.2, 0, true)
+      cameraControls?.current?.setLookAt(0, 1.5, 3, -1, 1.2, 0, true)
       .then(() => {
         // Desactiva los controles de cámara después de enfocar
-        setControlsEnabled(false);
+        //setControlsEnabled(false);
       });
     } else {
-      cameraControls?.current?.setLookAt(0, 2.2, 5, 0, 1.0, 0, true)
+      //cameraControls?.current?.setLookAt(0, 2.2, 5, 0, 1.0, 0, true)
+      cameraControls?.current?.setLookAt(0, 1.5, 3, -1, 1.2, 0, true)
       .then(() => {
         // Desactiva los controles de cámara después de enfocar
-        setControlsEnabled(false);
+        //setControlsEnabled(false);
       });
     }
   }, [cameraZoomed]);
 
   return (
-    <>
-      <CameraControls ref={cameraControls} enabled={controlsEnabled}/>
-      <Environment preset="sunset" />
-      <Suspense>
-        <Dots position_y={1.86} position_x={-0.08} />
-      </Suspense>
-      <Avatar/>
-      <ContactShadows opacity={0.7} />
-    </>
+    <div className="w-full h-screen relative">
+        <Loader />
+        <Leva hidden={true} />
+        {/*<Canvas shadows camera={{ position: [0, 0, 0.0001], fov: 30 }}>*/}
+        <Canvas camera={{ position: [0, 0, 1], fov: 30 }} >
+          <CameraControls ref={cameraControls} enabled={controlsEnabled} />
+          <Environment preset="sunset" />
+          <Suspense>
+            <Dots position_y={1.86} position_x={-0.08} />
+          </Suspense>
+          <Avatar/>
+          <ContactShadows opacity={0.7} />
+        </Canvas>
+        {/*<ChatWindow />*/}
+        {children}
+    </div>
   );
-    
-  /*return (
-    <>
-      <CameraControls ref={cameraControls} />
-      <Avatar/>
-      <Environment preset="sunset" />
-      <mesh>
-        <planeGeometry args={[viewport.width, viewport.height]} />
-      </mesh>
-    </>
-  );*/
 
-
-};
+}
