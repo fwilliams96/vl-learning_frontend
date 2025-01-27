@@ -8,14 +8,44 @@ import Listening from './components/Listening';
 import RolePlay from './components/RolePlay';
 import Login from './components/Login';
 import Register from './components/Register';
+import { PrivateRoute } from './components/PrivateRoute';
+
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/chat" element={<Experience><Chat /></Experience>} />
-      <Route path="/description" element={<Experience><Description /></Experience>} />
-      <Route path="/listening" element={<Experience><Listening /></Experience>} />
-      <Route path="/role-play" element={<Experience><RolePlay /></Experience>} />
+      <Route 
+        path="/chat" 
+        element={
+          <PrivateRoute>
+            <Experience><Chat /></Experience>
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/description" 
+        element={
+          <PrivateRoute>
+            <Experience><Description /></Experience>
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/listening" 
+        element={
+          <PrivateRoute>
+            <Experience><Listening /></Experience>
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/role-play" 
+        element={
+          <PrivateRoute>
+            <Experience><RolePlay /></Experience>
+          </PrivateRoute>
+        } 
+      />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
     </Routes>

@@ -2,7 +2,7 @@ import { Message } from "@/models/message";
 import { RolePlayData, RolePlayEvaluation, RolePlayType } from "@/models/role-play";
 import { useEffect, useState } from "react";
 
-const backendUrl = "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const useRolePlay = () => {
   const [rolePlay, setRolePlay] = useState<RolePlayData | null>(null);
@@ -14,7 +14,7 @@ export const useRolePlay = () => {
   const generateRolePlay = async (type: RolePlayType) => {
     setLoading(true);
 
-    const data = await fetch(`${backendUrl}/role-play`, {
+    const data = await fetch(`${API_URL}/role-play`, {
       method: "POST",
       body: JSON.stringify(
         { 
@@ -35,7 +35,7 @@ export const useRolePlay = () => {
     setLoading(true);
 
     //const messages = await getMockMessages();
-    const data = await fetch(`${backendUrl}/role-play/${rolePlayId}/messages`, {
+    const data = await fetch(`${API_URL}/role-play/${rolePlayId}/messages`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -51,7 +51,7 @@ export const useRolePlay = () => {
   const getRolePlayEvaluation = async (rolePlayId: string) => {
     setLoading(true);
 
-    const data = await fetch(`${backendUrl}/role-play/${rolePlayId}/evaluation`, {
+    const data = await fetch(`${API_URL}/role-play/${rolePlayId}/evaluation`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

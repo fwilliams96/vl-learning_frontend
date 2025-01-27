@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock, Facebook, User } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { createUser } from "@/services/userService";
 
 const Register: React.FC = () => {
   const [name, setName] = useState<string>("");
@@ -15,6 +18,8 @@ const Register: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const auth = getAuth();
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleRegister = async () => {
     try {
@@ -41,6 +46,21 @@ const Register: React.FC = () => {
       }
       
       console.log("Usuario registrado:", userCredential.user);
+
+      const token = await userCredential.user.getIdToken();
+
+      // 3. Crear usuario en nuestro backend
+      const user = await createUser(token, {
+        name: name.trim(),
+        email: email,
+        password: "" // Password vacío ya que se maneja en Firebase
+      });
+
+      console.log("Usuario creado en el backend:", user);
+
+      // Obtener el token y hacer login automático
+      login(token);
+      navigate("/");
     } catch (error: any) {
       // Mejorar los mensajes de error
       if (error.code === 'auth/email-already-in-use') {
@@ -59,8 +79,21 @@ const Register: React.FC = () => {
     const provider = new FacebookAuthProvider();
     try {
       setError("");
-      const result = await signInWithPopup(auth, provider);
-      console.log("Usuario registrado con Facebook:", result.user);
+      const userCredential = await signInWithPopup(auth, provider);
+      console.log("Usuario registrado con Facebook:", userCredential.user);
+
+      const token = await userCredential.user.getIdToken();
+
+      // 3. Crear usuario en nuestro backend
+      await createUser(token, {
+        name: name.trim(),
+        email: email,
+        password: "" // Password vacío ya que se maneja en Firebase
+      });
+
+      login(token);
+      navigate("/");
+
     } catch (error: any) {
       if (error.code === 'auth/account-exists-with-different-credential') {
         setError('Ya existe una cuenta con este email. Intenta otro método de inicio de sesión.');

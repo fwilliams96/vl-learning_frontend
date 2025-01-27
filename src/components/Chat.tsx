@@ -11,7 +11,6 @@ import { ResizableBox } from 'react-resizable';
 import { useChat } from '@/hooks/useChat';
 import { ChatData } from '@/models/chat';
 import { ChatMessageType, ChatMessageOrigin } from '@/models/chat-message';
-import { startChat } from '@/services/chatService';
 import { useAvatarController } from '@/hooks/useAvatarController';
 
 const Chat: React.FC = () => {
@@ -23,7 +22,7 @@ const Chat: React.FC = () => {
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const [chatPosition, setChatPosition] = useState({ x: 400, y: 100 });
   const [chatSize, setChatSize] = useState({ width: 600, height: 800 });
-  const { chat, loading, cameraZoomed, setCameraZoomed, message } = useChat();
+  const { createChat, chat, loading, cameraZoomed, setCameraZoomed, message } = useChat();
   const [chatData, setChatData] = useState<ChatData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -31,7 +30,6 @@ const Chat: React.FC = () => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { setMessage, setOnMessagePlayed } = useAvatarController();
-
   const [gameState, setGameState] = useState<'initial' | 'playing'>('initial');
 
   useEffect(() => {
@@ -58,7 +56,7 @@ const Chat: React.FC = () => {
   }, [message]);
 
   const handleSendMessage = () => {
-    if (!loading && !message && inputText) {
+    if (!loading && !message && inputText && chatData?.id) {
       setChatData((prev: ChatData | null) => {
         if (prev) {
           return {
@@ -68,7 +66,7 @@ const Chat: React.FC = () => {
         }
         return prev;
       });
-      chat(inputText);
+      chat(inputText, chatData.id);
       setInputText('');
     }
   }
@@ -103,19 +101,6 @@ const Chat: React.FC = () => {
     }
   }
 
-  const loadChat = async () => {
-    try {
-      const response = await startChat();
-      setChatData(response);
-    } catch (err) {
-      setError("Error fetching chats");
-    }
-  };
-
-  useEffect(() => {
-    loadChat();
-  }, [])
-
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.onended = () => setIsPlaying(false)
@@ -141,6 +126,7 @@ const Chat: React.FC = () => {
 
   const handleStart = () => {
     setGameState('playing');
+    createChat();
   };
 
   const renderContent = () => {

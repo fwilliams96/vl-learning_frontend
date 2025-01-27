@@ -1,20 +1,21 @@
 import { DescriptionData, DescriptionResult } from "@/models/description";
 import { useState } from "react";
 
-const backendUrl = "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const useDescription = () => {
   const [description, setDescription] = useState<DescriptionData | null>(null);
   const [result, setResult] = useState<DescriptionResult | null>(null);
   const [loading, setLoading] = useState(false);
   
-  const generateDescription = async () => {
+  const generateDescription = async (token: string) => {
     setLoading(true);
 
-    const data = await fetch(`${backendUrl}/description`, {
+    const data = await fetch(`${API_URL}/description`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       }
     });
 
@@ -23,13 +24,14 @@ export const useDescription = () => {
     setLoading(false);
   };
 
-  const sendUserDescription = async (description_id: string, content: string, format: string) => {
+  const sendUserDescription = async (description_id: string, content: string, format: string, token: string) => {
     setLoading(true);
 
-    const data = await fetch(`${backendUrl}/description/${description_id}/result`, {
+    const data = await fetch(`${API_URL}/description/${description_id}/result`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify({ "content": content, "format": format }),
     });

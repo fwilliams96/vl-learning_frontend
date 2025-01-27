@@ -7,12 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock, Facebook } from "lucide-react"; // Iconos de Lucide
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const auth = getAuth();
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   // Manejar inicio de sesión con correo y contraseña
   const handleLogin = async () => {
@@ -20,6 +24,10 @@ const Login: React.FC = () => {
       setError("");
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("Usuario autenticado con correo:", userCredential.user);
+      const token = await userCredential.user.getIdToken();
+      console.log("Token JWT:", token);
+      login(token);
+      navigate("/");
     } catch (error: any) {
       setError(error.message);
     }
@@ -37,6 +45,8 @@ const Login: React.FC = () => {
       // Opcional: Puedes guardar el token o mostrar información del usuario
       const token = await user.getIdToken();
       console.log("Token JWT:", token);
+      login(token);
+      navigate("/");
     } catch (error: any) {
       setError(error.message);
     }
@@ -103,6 +113,15 @@ const Login: React.FC = () => {
             <Facebook className="h-4 w-4" />
             Iniciar sesión con Facebook
           </Button>
+          <div className="w-full text-center text-sm text-gray-500 dark:text-gray-400 mt-2">
+            ¿No tienes una cuenta?{" "}
+            <Link 
+              to="/register" 
+              className="text-primary hover:underline font-medium"
+            >
+              Regístrate aquí
+            </Link>
+          </div>
         </CardFooter>
       </Card>
     </div>

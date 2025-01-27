@@ -1,18 +1,21 @@
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import { Layout } from "./components/Layout";
 import { AppRoutes } from "./AppRoutes";
 import { BrowserRouter } from "react-router-dom";
 import { ScrollToTop } from "./components/ScrollToTop";
-function App() {
 
+function App() {
   return (
     <BrowserRouter>
-      <ThemeProvider>
-        <Layout>
-          <ScrollToTop />
-          <AppRoutes />
-        </Layout>
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <Layout>
+            <ScrollToTop />
+            <AppRoutes />
+          </Layout>
+        </ThemeProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
