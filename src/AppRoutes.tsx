@@ -9,6 +9,7 @@ import RolePlay from './components/RolePlay';
 import Login from './components/Login';
 import Register from './components/Register';
 import { PrivateRoute } from './components/PrivateRoute';
+import { ChatProvider } from './contexts/ChatContext';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -18,7 +19,9 @@ export const AppRoutes: React.FC = () => {
         path="/chat" 
         element={
           <PrivateRoute>
-            <Experience><Chat /></Experience>
+            <ChatProvider>
+              <Experience><Chat /></Experience>
+            </ChatProvider>
           </PrivateRoute>
         } 
       />

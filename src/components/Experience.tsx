@@ -9,27 +9,33 @@ import {
   Text,
 } from "@react-three/drei";
 import { Suspense, useEffect, useRef, useState } from "react";
-import { useChat } from "../hooks/useChat";
 import { Avatar } from "./Avatar";
+import { useChat } from "@/contexts/ChatContext";
 
 const Dots = ({ position_x, position_y }: { position_x: number, position_y: number }) => {
   const { loading } = useChat();
   const [loadingText, setLoadingText] = useState("...");
+
   useEffect(() => {
+    console.log("loading", loading);
+    let interval: NodeJS.Timeout;
+
     if (loading) {
-      const interval = setInterval(() => {
-        setLoadingText((loadingText) => {
-          if (loadingText.length > 2) {
-            return ".";
-          }
-          return loadingText + ".";
-        });
-      }, 800);
-      return () => clearInterval(interval);
+      // Add the first dot immediately
+      setLoadingText(".");
+      // Then add the next dots every 300ms
+      interval = setInterval(() => {
+        setLoadingText(prev => prev.length >= 3 ? "." : prev + ".");
+      }, 300);
     } else {
       setLoadingText("");
     }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [loading]);
+  
   if (!loading) return null;
 
   return (
@@ -77,9 +83,7 @@ export function Experience({ children }: { children: React.ReactNode }) {
         <Canvas camera={{ position: [0, 0, 1], fov: 30 }} >
           <CameraControls ref={cameraControls} enabled={controlsEnabled} />
           <Environment preset="sunset" />
-          <Suspense>
             <Dots position_y={1.86} position_x={-0.08} />
-          </Suspense>
           <Avatar/>
           <ContactShadows opacity={0.7} />
         </Canvas>

@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { useChat } from "../hooks/useChat";
+import { useChat } from "@/contexts/ChatContext";
 
 export const UI = ({ hidden }: { hidden: boolean }) => {
   const input = useRef<HTMLInputElement>(null);
@@ -8,7 +8,7 @@ export const UI = ({ hidden }: { hidden: boolean }) => {
   const sendMessage = () => {
     const text = input.current?.value;
     if (!loading && !message && text) {
-      chat(text);
+      chat(text, "1");
       if (input.current) {
         input.current.value = "";
       }

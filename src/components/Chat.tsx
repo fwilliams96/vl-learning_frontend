@@ -8,11 +8,10 @@ import { Mic, Move, Send, Volume2 } from 'lucide-react';
 import Draggable, { DraggableEvent } from 'react-draggable';
 import './Chat.css';
 import { ResizableBox } from 'react-resizable';
-import { useChat } from '@/hooks/useChat';
 import { ChatData } from '@/models/chat';
 import { ChatMessageType, ChatMessageOrigin } from '@/models/chat-message';
 import { useAvatarController } from '@/hooks/useAvatarController';
-
+import { useChat } from '@/contexts/ChatContext';
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<{ text: string; sender: 'user' | 'ai' }[]>([
       { text: "Welcome to the English Academy AI chat! How can I help you today?", sender: 'ai' }
